@@ -39,7 +39,11 @@ def login():
             result.append(
 					{
 						'id':str(cs['UserId']),
-						'name':cs['fullName'],
+						'name':cs['fullNamel':cs['email']
+					}
+				)
+        access_token = create_access_token(identity=email)
+        return json'],
                         'email':cs['email']
 					}
 				)
