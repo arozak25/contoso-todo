@@ -39,7 +39,8 @@ def login():
             result.append(
 					{
 						'id':str(cs['UserId']),
-						'name':cs['fullName']
+						'name':cs['fullName'],
+                        'email':cs['email']
 					}
 				)
         access_token = create_access_token(identity=email)
