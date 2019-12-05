@@ -1,6 +1,6 @@
 from app import *
 
-@app.route('/register', methods=['GET','POST'])
+@app.route('/register', methods=['POST'])
 def CreateUser():
     GenerateUserId = uuid.uuid4()
     UserId = GenerateUserId
@@ -22,7 +22,7 @@ def CreateUser():
     return jsonify({'message':'Email already exists'})
 
 # Tambah Fitur Login
-@app.route('/login', methods=['POST','GET'])
+@app.route('/', methods=['POST'])
 def login():
     data = request.form
     email = data['email']
@@ -51,7 +51,7 @@ def login():
 
         })
 
-@app.route('/edit', methods=['POST', 'GET'])
+@app.route('/edit', methods=['PUT'])
 def editData():
     fullName = request.form['fullName']
     address = request.form['address']
@@ -64,7 +64,7 @@ def editData():
     mongo.db.user.update_one(updatequery, newvalues)
     return jsonify({'message': 'Edit berhasil'})
 
-@app.route('/forgetpassword', methods=['POST','GET'])
+@app.route('/forgetpassword', methods=['POST'])
 def SendEmailForgetPassword():
     email = request.form['email']
     access_token = create_access_token(identity=email)
@@ -72,11 +72,11 @@ def SendEmailForgetPassword():
     msg = Message("EMAIL CONFIRMATION",
                   sender='EMAIL_VERIFICATION',
                   recipients=[email])
-    msg.html = render_template('emails/verified.html')
+    msg.html = render_template('emails/email-verification.html')
     mail.send(msg)
     return jsonify({'message':'Buka email anda','access_token':access_token})
 
-@app.route('/forgetpassword/changepassword',methods=['POST','GET'])
+@app.route('/forgetpassword/changepassword',methods=['PUT'])
 @jwt_required
 def updateForgetPassword():
     email = get_jwt_identity()
