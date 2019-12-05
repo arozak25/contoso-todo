@@ -52,22 +52,19 @@ def login():
 
         }
 
+@app.route('/edit', methods=['POST', 'GET'])
+def editData():
+    fullName = request.form['fullName']
+    address = request.form['address']
+    phoneNumber = request.form['phoneNumber']
+    profilePictureUrl = request.form['ProfilePictureUrl']
+    email = request.form['email']
+    updatequery = {'email': email}
+    newvalues = {'$set': {'fullName': fullName, 'address': address, 'phoneNumber': phoneNumber,
+                                  'profilePictureUrl': profilePictureUrl}}
+    mongo.db.user.update_one(updatequery, newvalues)
+    return jsonify({'message': 'Edit berhasil'})
 
-
-
-
-
-#
-# @app.route('/register/userdata', methods=['GET','POST'])
-# def InsertDataUser():
-#     fullName = request.form['fullName']
-#     address = request.form['address']
-#     phoneNumber = request.form['phoneNumber']
-#     profilePictureUrl = request.form['ProfilePictureUrl']
-#     updatequery = {'email': 'dandungjnjnjn@gmail.com'}
-#     newvalues = {'$set': {'fullName': fullName, 'address': address, 'phoneNumber': phoneNumber,'profilePictureUrl':profilePictureUrl}}
-#
-#     mongo.db.user.update_one(updatequery,newvalues)
 
 if __name__ == "__main__":
     app.run(debug=True)
