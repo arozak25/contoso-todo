@@ -4,10 +4,11 @@ from flask_jwt_extended import *
 from flask_mail import Mail, Message
 from flask_bcrypt import *
 import os
+
 app = Flask(__name__)
 
-EMAIL_USER = 'dandungjn1@gmail.com'
-EMAIL_PASSWORD = '087870999077d'
+EMAIL_USER = '-'
+EMAIL_PASSWORD = '-'
 
 mail_settings = {
     "MAIL_SERVER": 'smtp.gmail.com',
