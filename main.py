@@ -1,7 +1,6 @@
 from app import *
 
-
-@app.route('/register', methods=['GET','POST'])
+@app.route('/register', methods=['POST'])
 def CreateUser():
     GenerateUserId = uuid.uuid4()
     UserId = GenerateUserId
@@ -23,7 +22,7 @@ def CreateUser():
     return jsonify({'message':'Email already exists'})
 
 # Tambah Fitur Login
-@app.route('/', methods=['POST','GET'])
+@app.route('/', methods=['POST'])
 def login():
     data = request.form
     email = data['email']
@@ -50,20 +49,45 @@ def login():
             'result':'Not Found',
             'status':404
 
-        }
+        })
 
-@app.route('/edit', methods=['POST', 'GET'])
+@app.route('/edit', methods=['PUT'])
 def editData():
     fullName = request.form['fullName']
     address = request.form['address']
     phoneNumber = request.form['phoneNumber']
-    profilePictureUrl = request.form['ProfilePictureUrl']
+    profilePictureUrl = request.form['profilePictureUrl']
     email = request.form['email']
     updatequery = {'email': email}
     newvalues = {'$set': {'fullName': fullName, 'address': address, 'phoneNumber': phoneNumber,
                                   'profilePictureUrl': profilePictureUrl}}
     mongo.db.user.update_one(updatequery, newvalues)
     return jsonify({'message': 'Edit berhasil'})
+
+@app.route('/forgetpassword', methods=['POST'])
+def SendEmailForgetPassword():
+    email = request.form['email']
+    access_token = create_access_token(identity=email)
+
+    msg = Message("EMAIL CONFIRMATION",
+                  sender='EMAIL_VERIFICATION',
+                  recipients=[email])
+    msg.html = render_template('emails/email-verification.html')
+    mail.send(msg)
+    return jsonify({'message':'Buka email anda','access_token':access_token})
+
+@app.route('/forgetpassword/changepassword',methods=['PUT'])
+@jwt_required
+def updateForgetPassword():
+    email = get_jwt_identity()
+    newpassword = request.form['newpassword']
+    pw_hash = bcrypt.generate_password_hash(newpassword)
+    print(email)
+    updatequery = {'email': email}
+    newvalues = {'$set': {'password': pw_hash}}
+    mongo.db.user.update_one(updatequery, newvalues)
+
+    return jsonify({'message':'success'})
 
 
 if __name__ == "__main__":
