@@ -41,8 +41,10 @@ def login():
                 'role':doc['role'],
                 'verified':doc['verified']
             })
+        access_token = create_access_token(identity=email)
         return jsonify({
             'result':result,
+            'access_token':access_token,
             'status': 200
         })
     else:
@@ -50,7 +52,9 @@ def login():
             'result':'Not Found',
             'status':404
 
-        }
+        })
+
+
 
 @app.route('/edit', methods=['POST', 'GET'])
 def editData():

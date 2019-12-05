@@ -26,7 +26,7 @@ app.config["MONGO_URI"] = "mongodb://localhost:27017/contoso"
 app.config['JWT_SECRET_KEY'] = 'SECRET_KEY'
 app.config['SECRET_KEY'] = 'SECRET_KEY'
 app.config.update(mail_settings)
-app.config['JWT_BLACKLIST_ENABLED'] = True
+app.config['JWT_BLACKLIST_ENABLED'] = False
 app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 
 
