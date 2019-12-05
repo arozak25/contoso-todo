@@ -28,7 +28,6 @@ def login():
     email = data['email']
     pw_hash = bcrypt.generate_password_hash(data['password'])
     a = mongo.db.user.find_one({'email':email})
-    print(a['password'])
     b = bcrypt.check_password_hash(a['password'],data['password'])
     result =[]
     if b == True:
@@ -40,8 +39,10 @@ def login():
                 'role':doc['role'],
                 'verified':doc['verified']
             })
+        access_token = create_access_token(identity=email)
         return jsonify({
             'result':result,
+            'access_token':access_token,
             'status': 200
         })
     else:
@@ -52,6 +53,7 @@ def login():
         })
 
 @app.route('/edit', methods=['PUT'])
+@jwt_required
 def editData():
     fullName = request.form['fullName']
     address = request.form['address']
@@ -88,6 +90,35 @@ def updateForgetPassword():
     mongo.db.user.update_one(updatequery, newvalues)
 
     return jsonify({'message':'success'})
+
+@jwt.token_in_blacklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+    jti = decrypted_token['jti']
+    return jti in blacklist
+
+
+
+@app.route('/logout', methods=['DELETE'])
+@jwt_required
+def logout():
+    jti = get_raw_jwt()['jti']
+    blacklist.add(jti)
+    return jsonify({"msg": "Successfully logged out"}), 200
+
+
+
+@app.route('/logout2', methods=['DELETE'])
+@jwt_required
+def logout2():
+    jti = get_raw_jwt()['jti']
+    blacklist.add(jti)
+    return jsonify({"msg": "Successfully logged out"}), 200
+
+
+@app.route('/protected', methods=['GET'])
+@jwt_required
+def protected():
+    return jsonify({'hello': 'world'})
 
 
 if __name__ == "__main__":
