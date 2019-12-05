@@ -1,7 +1,8 @@
-from flask import Flask
+from flask import *
 from flask_pymongo import *
 from flask_jwt_extended import *
 from flask_mail import Mail, Message
+from flask_bcrypt import *
 import os
 app = Flask(__name__)
 
@@ -27,6 +28,8 @@ app.config.update(mail_settings)
 app.config['JWT_BLACKLIST_ENABLED'] = True
 app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 
+
 mongo = PyMongo(app)
 jwt = JWTManager(app)
 mail = Mail(app)
+bcrypt = Bcrypt(app)
