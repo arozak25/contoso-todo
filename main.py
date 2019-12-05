@@ -22,7 +22,7 @@ def CreateUser():
     return jsonify({'message':'Email already exists'})
 
 # Tambah Fitur Login
-@app.route('/', methods=['POST','GET'])
+@app.route('/login', methods=['POST','GET'])
 def login():
     data = request.form
     email = data['email']
@@ -64,11 +64,30 @@ def editData():
     mongo.db.user.update_one(updatequery, newvalues)
     return jsonify({'message': 'Edit berhasil'})
 
+@app.route('/forgetpassword', methods=['POST','GET'])
+def SendEmailForgetPassword():
+    email = request.form['email']
+    access_token = create_access_token(identity=email)
 
+    msg = Message("EMAIL CONFIRMATION",
+                  sender='EMAIL_VERIFICATION',
+                  recipients=[email])
+    msg.html = render_template('emails/verified.html')
+    mail.send(msg)
+    return jsonify({'message':'Buka email anda','access_token':access_token})
 
+@app.route('/forgetpassword/changepassword',methods=['POST','GET'])
+@jwt_required
+def updateForgetPassword():
+    email = get_jwt_identity()
+    newpassword = request.form['newpassword']
+    pw_hash = bcrypt.generate_password_hash(newpassword)
+    print(email)
+    updatequery = {'email': email}
+    newvalues = {'$set': {'password': pw_hash}}
+    mongo.db.user.update_one(updatequery, newvalues)
 
-
-
+    return jsonify({'message':'success'})
 
 
 if __name__ == "__main__":
