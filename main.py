@@ -1,6 +1,5 @@
 from app import *
 
-
 @app.route('/register', methods=['GET','POST'])
 def CreateUser():
     GenerateUserId = uuid.uuid4()
@@ -50,20 +49,26 @@ def login():
             'result':'Not Found',
             'status':404
 
-        }
+        })
 
 @app.route('/edit', methods=['POST', 'GET'])
 def editData():
     fullName = request.form['fullName']
     address = request.form['address']
     phoneNumber = request.form['phoneNumber']
-    profilePictureUrl = request.form['ProfilePictureUrl']
+    profilePictureUrl = request.form['profilePictureUrl']
     email = request.form['email']
     updatequery = {'email': email}
     newvalues = {'$set': {'fullName': fullName, 'address': address, 'phoneNumber': phoneNumber,
                                   'profilePictureUrl': profilePictureUrl}}
     mongo.db.user.update_one(updatequery, newvalues)
     return jsonify({'message': 'Edit berhasil'})
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
