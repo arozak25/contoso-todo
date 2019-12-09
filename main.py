@@ -156,6 +156,26 @@ def newTask(id):
     except Exception as e:
         return e
 
+@app.route('/showall', methods=['POST','GET'])
+@jwt_required
+def showalltodolist():
+    user_id = "001"
+    todolist = mongo.db.todo.find({'userId': user_id})
+    result = []
+    for alltodo in todolist:
+        result.append({
+            'toDoId':str(alltodo['toDoId']),
+            'name':alltodo['name'],
+            'description':alltodo['description'],
+            'date':alltodo['date'],
+            'favorite': alltodo['favorite'],
+            'completed': alltodo['completed'],
+            'deleted': alltodo['deleted'],
+            'createdAt': alltodo['createdAt'],
+            'updatedAt': alltodo['updatedAt'],
+        })
+    resp = jsonify({'result':result})
+    return resp
 
 
 
