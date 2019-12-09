@@ -4,8 +4,8 @@
     <list default="true" id="9ed54362-2c24-4ac9-93c1-b8072eb38b1d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/lupapasword.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/lupapasword.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,6 +16,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Python Script" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -23,12 +24,17 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1UVHkMWl5j7yWNFKatqg3XyP0Lk" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="configurable.group.appearance" />
@@ -99,10 +105,29 @@
       </map>
     </option>
   </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
   <component name="WindowStateProjectService">
+    <state x="609" y="220" width="424" height="484" key="FileChooserDialogImpl" timestamp="1575622879532">
+      <screen x="53" y="27" width="1547" height="873" />
+    </state>
+    <state x="609" y="220" width="424" height="484" key="FileChooserDialogImpl/53.27.1547.873@53.27.1547.873" timestamp="1575622879532" />
     <state x="315" y="97" key="SettingsEditor" timestamp="1575536330931">
       <screen x="53" y="27" width="1547" height="873" />
     </state>
     <state x="315" y="97" key="SettingsEditor/53.27.1547.873@53.27.1547.873" timestamp="1575536330931" />
+    <state x="421" y="198" width="800" height="528" key="Vcs.Push.Dialog.v2" timestamp="1575557294892">
+      <screen x="53" y="27" width="1547" height="873" />
+    </state>
+    <state x="421" y="198" width="800" height="528" key="Vcs.Push.Dialog.v2/53.27.1547.873@53.27.1547.873" timestamp="1575557294892" />
+    <state x="490" y="208" key="run.anything.popup" timestamp="1575864040702">
+      <screen x="53" y="27" width="1547" height="873" />
+    </state>
+    <state x="490" y="208" key="run.anything.popup/53.27.1547.873@53.27.1547.873" timestamp="1575864040702" />
+    <state x="489" y="212" width="672" height="678" key="search.everywhere.popup" timestamp="1575864000378">
+      <screen x="53" y="27" width="1547" height="873" />
+    </state>
+    <state x="489" y="212" width="672" height="678" key="search.everywhere.popup/53.27.1547.873@53.27.1547.873" timestamp="1575864000378" />
   </component>
 </project>

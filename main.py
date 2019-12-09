@@ -121,5 +121,45 @@ def protected():
     return jsonify({'hello': 'world'})
 
 
+#######################################################################################################################
+
+@app.route('/createtask/<id>', methods=['POST'])
+@jwt_required
+def newTask(id):
+    GenerateToDoId = uuid.uuid4()
+    form = request.form
+    name = form['name']
+    description = form['description']
+    date = form['date']
+    favorite = form['favorite']
+    completed = False
+    deleted = False
+    userId = id
+    createdAt = datetime.now()
+    updatedAt = datetime.now()
+    try:
+        new_task = mongo.db.todo.insert(
+                {
+                    "toDoId":GenerateToDoId,
+                    "name":name,
+                    "description":description,
+                    "date":date,
+                    "favorite":favorite,
+                    "completed":completed,
+                    "deleted":deleted,
+                    "userId":userId,
+                    "createdAt":createdAt,
+                    "updatedAt":updatedAt
+                })
+        if new_task and request.method == 'POST':
+            return jsonify('Success!')
+    except Exception as e:
+        return e
+
+
+
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)
