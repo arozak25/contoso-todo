@@ -177,6 +177,14 @@ def showalltodolist():
     resp = jsonify({'result':result})
     return resp
 
+@app.route('/delete', methods=['PUT'])
+def delete():
+    tododelete = ["dandung","arjuna","arya"]
+    for bulkdelete in tododelete:
+        updatequery = {'name': tododelete}
+        newvalues = {'$set': {'deleted': True}}
+        mongo.db.todo.update_one(updatequery, newvalues)
+    return jsonify({'message':'success','status':200})
 
 
 
