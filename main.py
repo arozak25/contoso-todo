@@ -159,8 +159,8 @@ def newTask(id):
 @app.route('/showall', methods=['POST','GET'])
 @jwt_required
 def showalltodolist():
-    user_id = "001"
-    todolist = mongo.db.todo.find({'userId': user_id})
+    user_id = "100"
+    todolist = mongo.db.todo.find({'userId': user_id,'deleted':False})
     result = []
     for alltodo in todolist:
         result.append({
@@ -176,6 +176,7 @@ def showalltodolist():
         })
     resp = jsonify({'result':result})
     return resp
+
 
 @app.route('/delete', methods=['PUT'])
 def delete():
