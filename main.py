@@ -1,5 +1,4 @@
 from app import *
-from flask_pymongo import pymongo
 
 @app.route('/register', methods=['POST'])
 def CreateUser():
@@ -37,20 +36,7 @@ def CreateUser():
         updatedAt = datetime.now()
 
     if existing_user is None:
-        mongo.db.user.insert({
-            'userId': UserId ,
-            'fullName': fullName,
-            'email': email,
-            'password': pw_hash,
-            'address':address,
-            'phoneNumber':phoneNumber,
-            'role':role,
-            'verified':verified,
-            'profilePictureUrl':profilePictureUrl,
-            'createdAt':createdAt,
-            'updatedAt':updatedAt
-        })
-
+        mongo.db.user.insert({'UserId': UserId ,'fullName': fullName,'email': email, 'password': pw_hash,'address':address,'phoneNumber':phoneNumber,'role':role,'verified':verified,'profilePictureUrl':'-','createdAt':createdAt,'updatedAt':updatedAt})
         return jsonify({'message':'Registrasi berhasil !'})
 
     return jsonify({'message':'Email already exists'})
@@ -76,12 +62,13 @@ def login():
         isi = mongo.db.user.find({'email':email})
         for doc in isi:
             result.append({
-                'UserId':str(doc['userId']),
+                'UserId':str(doc['UserId']),
                 'fullName':doc['fullName'],
                 'role':doc['role'],
                 'verified':doc['verified']
             })
-        access_token = create_access_token(identity=email)
+        expires = dt.timedelta(days=1)
+        access_token = create_access_token(identity=email,expires_delta=expires)
         return jsonify({
             'result':result,
             'access_token':access_token,
@@ -111,23 +98,17 @@ def editData():
         email = request.json['email']
 
     updatequery = {'email': email}
-    newvalues = {'$set':
-                     {'fullName': fullName,
-                      'address': address,
-                      'phoneNumber': phoneNumber,
-                      'profilePictureUrl': profilePictureUrl
-                      }
-                 }
+    newvalues = {'$set': {'fullName': fullName, 'address': address, 'phoneNumber': phoneNumber,
+                                  'profilePictureUrl': profilePictureUrl}}
     mongo.db.user.update_one(updatequery, newvalues)
     return jsonify({'message': 'Edit berhasil'})
-
 
 @app.route('/forgetpassword', methods=['POST'])
 def SendEmailForgetPassword():
     if request.form:
         email = request.form['email']
     else:
-        email = request.json['email']
+        email= request.json['email']
 
     access_token = create_access_token(identity=email)
 
@@ -136,8 +117,7 @@ def SendEmailForgetPassword():
                   recipients=[email])
     msg.html = render_template('emails/email-verification.html')
     mail.send(msg)
-    return jsonify({'message': 'Buka email anda', 'access_token': access_token})
-
+    return jsonify({'message':'Buka email anda','access_token':access_token})
 
 @app.route('/forgetpassword/changepassword',methods=['PUT'])
 @jwt_required
@@ -155,15 +135,10 @@ def updateForgetPassword():
 
     return jsonify({'message':'success'})
 
-
-
-
-
 @jwt.token_in_blacklist_loader
 def check_if_token_in_blacklist(decrypted_token):
     jti = decrypted_token['jti']
     return jti in blacklist
-
 
 
 
@@ -191,31 +166,32 @@ def protected():
 
 
 #######################################################################################################################
-@app.route('/showuser', methods=['GET'])
-def allUser():
-    result = []
-    user = mongo.db.user.find()
-    for a in user:
-        result.append({
-            'userId':str(a['userId'])
-        })
-    return jsonify({'result':result})
 
-
-@app.route('/createtask/<uuid:userid>', methods=['POST'])
-# @jwt_required
-def newTask(userid):
-    GenerateToDoId = uuid.uuid4()
-    form = request.form
-    name = form['name']
-    description = form['description']
-    date = form['date']
-    favorite = form['favorite']
-    completed = False
-    deleted = False
-    userId = userid
-    createdAt = datetime.now()
-    updatedAt = datetime.now()
+@app.route('/createtask', methods=['POST'])
+@jwt_required
+def newTask():
+    if request.form:
+        GenerateToDoId = uuid.uuid4()
+        name = request.form['name']
+        description = request.form['description'] or None
+        date = request.form['date']
+        favorite = False
+        completed = False
+        deleted = False
+        userId = request.form['userId']
+        createdAt = datetime.now()
+        updatedAt = datetime.now()
+    else:
+        GenerateToDoId = uuid.uuid4()
+        name = request.json['name']
+        description = request.json['description'] or None
+        date = request.json['date']
+        favorite = False
+        completed = False
+        deleted = False
+        userId = request.json['userId']
+        createdAt = datetime.now()
+        updatedAt = datetime.now()
     try:
         new_task = mongo.db.todo.insert(
                 {
@@ -235,13 +211,13 @@ def newTask(userid):
     except Exception as e:
         return e
 
-
-
-
 @app.route('/showall', methods=['POST','GET'])
 @jwt_required
 def showalltodolist():
-    user_id = "100"
+    if request.form:
+        user_id = request.form['user_id']
+    else:
+        user_id = request.json['user_id']
     todolist = mongo.db.todo.find({'userId': user_id,'deleted':False})
     result = []
     for alltodo in todolist:
@@ -259,15 +235,12 @@ def showalltodolist():
     resp = jsonify({'result':result})
     return resp
 
-
-
-
 @app.route('/delete', methods=['PUT'])
 def delete():
     tododelete = ["dandung","arjuna","arya"]
     for bulkdelete in tododelete:
-        updatequery = {'name': tododelete}
-        newvalues = {'$set': {'deleted': True}}
+        updatequery = {'name': bulkdelete}
+        newvalues = {'$set': {'deleted': False}}
         mongo.db.todo.update_one(updatequery, newvalues)
     return jsonify({'message':'success','status':200})
 
@@ -277,8 +250,10 @@ def delete():
 @app.route('/todolist/page', methods = ['GET'])
 @jwt_required
 def pagination():
-
-    user_id = "100"
+    if request.form:
+        user_id = request.form['user_id']
+    else:
+        user_id = request.json['user_id']
     number = mongo.db.todo
 
     offset = int(request.args['offset'])
@@ -293,29 +268,14 @@ def pagination():
     for i in pagination:
         output.append({'name': i['name'],'description': i['description'],'date': i['date'],'favorite': i['favorite'],'deleted': i['deleted'],'createdAt': i['createdAt'],'updatedAt': i['updatedAt']})
 
-    next_url = '/todolist/page?limit=' + str(limit) + '&offset=' + str(offset + limit)
-    prev_url = '/todolist/page?limit=' + str(limit) + '&offset=' + str(offset - limit)
+    if offset == 0 :
+        next_url = '/todolist/page?limit=' + str(limit) + '&offset=' + str(offset + limit)
+        prev_url = ''
+    else:
+        next_url = '/todolist/page?limit=' + str(limit) + '&offset=' + str(offset + limit)
+        prev_url = '/todolist/page?limit=' + str(limit) + '&offset=' + str(offset - limit)
 
     return jsonify({'result': output,'prev_url': prev_url ,'next_url': next_url})
-
-
-
-@app.route('/updatetask/<uuid:todoid>/<uuid:userid>', methods=['PUT'])
-def updateTask(todoid,userid):
-    form = request.form
-    name = form['name']
-    description = form['description']
-    date = form['date']
-    favorite = form['favorite']
-    updatedAt = datetime.now()
-    try:
-        update_task = mongo.db.todo.update({"ToDoId":todoid,"userId":userid},{'$set':{"name":name,"description":description,"date":date,"favorite":favorite,"updatedAt":updatedAt}})
-        if update_task:
-            return jsonify({'result':'success!'})
-    except Exception as e:
-        return e
-
-
 
 
 @app.route('/uploader', methods = ['GET', 'POST'])
@@ -324,9 +284,6 @@ def upload_fille():
       f = request.files['file']
       f.save(secure_filename(f.filename))
       return 'file uploaded successfully'
-
-
-
 
 
 @app.route('/upload',methods = ['GET','POST'])
@@ -340,7 +297,6 @@ def upload_file():
             return "sucess"
     return "Sucess!"
 
+
 if __name__ == "__main__":
     app.run(debug=True)
-
-# ea1hE3wb6mkpsa2rRVRo
