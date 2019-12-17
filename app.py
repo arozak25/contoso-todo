@@ -3,11 +3,13 @@ from flask_pymongo import *
 from flask_jwt_extended import *
 from flask_mail import Mail, Message
 from flask_bcrypt import *
-from datetime import datetime
-from werkzeug import *
 import uuid
 import datetime as dt
 import os
+from datetime import datetime
+import datetime as dt
+from werkzeug import *
+
 
 app = Flask(__name__)
 
