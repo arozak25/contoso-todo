@@ -1,35 +1,64 @@
 from app import *
+from flask_pymongo import pymongo
 
 @app.route('/register', methods=['POST'])
 def CreateUser():
-    GenerateUserId = uuid.uuid4()
-    UserId = GenerateUserId
-    password = request.form['password']
-    pw_hash = bcrypt.generate_password_hash(password)
-    email = request.form['email']
-    existing_user = mongo.db.user.find_one({"email": email})
-    fullName = request.form['fullName']
-    address = request.form['address']
-    phoneNumber = request.form['phoneNumber']
-    role = request.form['role']
-    verified = "No"
-    profilePictureUrl = request.form['profilePictureUrl']
-    createdAt = datetime.now()
-    updatedAt = datetime.now()
+    if request.form:
+        GenerateUserId = uuid.uuid4()
+        UserId = GenerateUserId
+        print(request.form)
+        password = request.form['password']
+        pw_hash = bcrypt.generate_password_hash(password)
+        email = request.form['email']
+        existing_user = mongo.db.user.find_one({"email": email})
+        fullName = request.form['fullName']
+        address = request.form['address']
+        phoneNumber = request.form['phoneNumber']
+        role = "member"
+        verified = "No"
+        # profilePictureUrl = request.form['profilePictureUrl']
+        createdAt = datetime.now()
+        updatedAt = datetime.now()
+    else:
+        GenerateUserId = uuid.uuid4()
+        UserId = GenerateUserId
+        print(request.get_json())
+        password = request.json['password']
+        pw_hash = bcrypt.generate_password_hash(password)
+        email = request.json['email']
+        existing_user = mongo.db.user.find_one({"email": email})
+        fullName = request.json['fullName']
+        address = request.json['address']
+        phoneNumber = request.json['phoneNumber']
+        role = "member"
+        verified = "No"
+        # profilePictureUrl = request.json['profilePictureUrl']
+        createdAt = datetime.now()
+        updatedAt = datetime.now()
+
     if existing_user is None:
-        mongo.db.user.insert({'UserId': UserId ,'fullName': fullName,'email': email, 'password': pw_hash,'address':address,'phoneNumber':phoneNumber,'role':role,'verified':verified,'profilePictureUrl':profilePictureUrl,'createdAt':createdAt,'updatedAt':updatedAt})
+        mongo.db.user.insert({'UserId': UserId ,'fullName': fullName,'email': email, 'password': pw_hash,'address':address,'phoneNumber':phoneNumber,'role':role,'verified':verified,'profilePictureUrl':'-','createdAt':createdAt,'updatedAt':updatedAt})
         return jsonify({'message':'Registrasi berhasil !'})
+
     return jsonify({'message':'Email already exists'})
 
 # Tambah Fitur Login
-@app.route('/', methods=['POST'])
+@app.route('/login', methods=['POST'])
 def login():
-    data = request.form
-    email = data['email']
-    pw_hash = bcrypt.generate_password_hash(data['password'])
-    a = mongo.db.user.find_one({'email':email})
-    b = bcrypt.check_password_hash(a['password'],data['password'])
-    result =[]
+    if request.form:
+        data = request.form
+        email = data['email']
+        pw_hash = bcrypt.generate_password_hash(data['password'])
+        a = mongo.db.user.find_one({'email':email})
+        b = bcrypt.check_password_hash(a['password'],data['password'])
+        result =[]
+    else:
+        data = request.json
+        email = data['email']
+        pw_hash = bcrypt.generate_password_hash(data['password'])
+        a = mongo.db.user.find_one({'email': email})
+        b = bcrypt.check_password_hash(a['password'], data['password'])
+        result = []
     if b == True:
         isi = mongo.db.user.find({'email':email})
         for doc in isi:
@@ -187,6 +216,30 @@ def delete():
         mongo.db.todo.update_one(updatequery, newvalues)
     return jsonify({'message':'success','status':200})
 
+
+@app.route('/todolist/page', methods = ['GET'])
+@jwt_required
+def pagination():
+
+    user_id = "100"
+    number = mongo.db.todo
+
+    offset = int(request.args['offset'])
+    limit = int(request.args['limit'])
+
+    starting_id = number.find({'userId': user_id,'deleted':False}).sort('_id', pymongo.ASCENDING)
+    last_id= starting_id[offset]['_id']
+
+    pagination = number.find({'_id' : {'$gte': last_id}}).sort('_id', pymongo.ASCENDING).limit(limit)
+    output = []
+
+    for i in pagination:
+        output.append({'name': i['name'],'description': i['description'],'date': i['date'],'favorite': i['favorite'],'deleted': i['deleted'],'createdAt': i['createdAt'],'updatedAt': i['updatedAt']})
+
+    next_url = '/todolist/page?limit=' + str(limit) + '&offset=' + str(offset + limit)
+    prev_url = '/todolist/page?limit=' + str(limit) + '&offset=' + str(offset - limit)
+
+    return jsonify({'result': output,'prev_url': prev_url ,'next_url': next_url})
 
 
 
