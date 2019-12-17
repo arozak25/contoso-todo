@@ -185,7 +185,7 @@ def newTask():
     else:
         GenerateToDoId = uuid.uuid4()
         name = request.json['name']
-        description = request.json['description']
+        description = request.json['description', None]
         date = request.json['date']
         favorite = False
         completed = False
@@ -251,8 +251,10 @@ def delete():
 @app.route('/todolist/page', methods = ['GET'])
 @jwt_required
 def pagination():
-
-    user_id = "100"
+    if request.form:
+        user_id = request.form['user_id']
+    else:
+        user_id = request.json['user_id']
     number = mongo.db.todo
 
     offset = int(request.args['offset'])
@@ -275,6 +277,26 @@ def pagination():
         prev_url = '/todolist/page?limit=' + str(limit) + '&offset=' + str(offset - limit)
 
     return jsonify({'result': output,'prev_url': prev_url ,'next_url': next_url})
+
+
+@app.route('/uploader', methods = ['GET', 'POST'])
+def upload_fille():
+   if request.method == 'POST':
+      f = request.files['file']
+      f.save(secure_filename(f.filename))
+      return 'file uploaded successfully'
+
+
+@app.route('/upload',methods = ['GET','POST'])
+def upload_file():
+    if request.method =='POST':
+        file = request.files['file']
+        if file:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
+            mongo.db.image.insert({'url':filename})
+            return "sucess"
+    return "Sucess!"
 
 
 if __name__ == "__main__":
