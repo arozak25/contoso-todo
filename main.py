@@ -17,7 +17,7 @@ def CreateUser():
     createdAt = datetime.now()
     updatedAt = datetime.now()
     if existing_user is None:
-        mongo.db.user.insert({'UserId': UserId ,'fullName': fullName,'email': email, 'password': pw_hash,'address':address,'phoneNumber':phoneNumber,'role':role,'verified':verified,'profilePictureUrl':profilePictureUrl,'createdAt':createdAt,'updatedAt':updatedAt})
+        mongo.db.user.insert({'userId': UserId ,'fullName': fullName,'email': email, 'password': pw_hash,'address':address,'phoneNumber':phoneNumber,'role':role,'verified':verified,'profilePictureUrl':profilePictureUrl,'createdAt':createdAt,'updatedAt':updatedAt})
         return jsonify({'message':'Registrasi berhasil !'})
     return jsonify({'message':'Email already exists'})
 
@@ -34,7 +34,7 @@ def login():
         isi = mongo.db.user.find({'email':email})
         for doc in isi:
             result.append({
-                'UserId':str(doc['UserId']),
+                'UserId':str(doc['userId']),
                 'fullName':doc['fullName'],
                 'role':doc['role'],
                 'verified':doc['verified']
@@ -122,10 +122,20 @@ def protected():
 
 
 #######################################################################################################################
+@app.route('/showuser', methods=['GET'])
+def allUser():
+    result = []
+    user = mongo.db.user.find()
+    for a in user:
+        result.append({
+            'userId':str(a['userId'])
+        })
+    return jsonify({'result':result})
 
-@app.route('/createtask/<id>', methods=['POST'])
-@jwt_required
-def newTask(id):
+
+@app.route('/createtask/<uuid:userid>', methods=['POST'])
+# @jwt_required
+def newTask(userid):
     GenerateToDoId = uuid.uuid4()
     form = request.form
     name = form['name']
@@ -134,7 +144,7 @@ def newTask(id):
     favorite = form['favorite']
     completed = False
     deleted = False
-    userId = id
+    userId = userid
     createdAt = datetime.now()
     updatedAt = datetime.now()
     try:
@@ -152,14 +162,104 @@ def newTask(id):
                     "updatedAt":updatedAt
                 })
         if new_task and request.method == 'POST':
-            return jsonify('Success!')
+            return jsonify(new_task)
     except Exception as e:
         return e
 
 
 
+@app.route('/showall', methods=['POST','GET'])
+@jwt_required
+def showalltodolist():
+    user_id = "100"
+    todolist = mongo.db.todo.find({'userId': user_id,'deleted':False})
+    result = []
+    for alltodo in todolist:
+        result.append({
+            'toDoId':str(alltodo['toDoId']),
+            'name':alltodo['name'],
+            'description':alltodo['description'],
+            'date':alltodo['date'],
+            'favorite': alltodo['favorite'],
+            'completed': alltodo['completed'],
+            'deleted': alltodo['deleted'],
+            'createdAt': alltodo['createdAt'],
+            'updatedAt': alltodo['updatedAt'],
+        })
+    resp = jsonify({'result':result})
+    return resp
 
 
+@app.route('/delete', methods=['PUT'])
+def delete():
+    tododelete = ["dandung","arjuna","arya"]
+    for bulkdelete in tododelete:
+        updatequery = {'name': tododelete}
+        newvalues = {'$set': {'deleted': True}}
+        mongo.db.todo.update_one(updatequery, newvalues)
+    return jsonify({'message':'success','status':200})
+
+
+@app.route('/todolist/page', methods = ['GET'])
+@jwt_required
+def pagination():
+
+    user_id = "100"
+    number = mongo.db.todo
+
+    offset = int(request.args['offset'])
+    limit = int(request.args['limit'])
+
+    starting_id = number.find({'userId': user_id,'deleted':False}).sort('_id', pymongo.ASCENDING)
+    last_id= starting_id[offset]['_id']
+
+    pagination = number.find({'_id' : {'$gte': last_id}}).sort('_id', pymongo.ASCENDING).limit(limit)
+    output = []
+
+    for i in pagination:
+        output.append({'name': i['name'],'description': i['description'],'date': i['date'],'favorite': i['favorite'],'deleted': i['deleted'],'createdAt': i['createdAt'],'updatedAt': i['updatedAt']})
+
+    next_url = '/todolist/page?limit=' + str(limit) + '&offset=' + str(offset + limit)
+    prev_url = '/todolist/page?limit=' + str(limit) + '&offset=' + str(offset - limit)
+
+    return jsonify({'result': output,'prev_url': prev_url ,'next_url': next_url})
+
+
+
+@app.route('/updatetask/<uuid:todoid>/<uuid:userid>', methods=['PUT'])
+def updateTask(todoid,userid):
+    form = request.form
+    name = form['name']
+    description = form['description']
+    date = form['date']
+    favorite = form['favorite']
+    updatedAt = datetime.now()
+    try:
+        update_task = mongo.db.todo.update({"ToDoId":todoid,"userId":userid},{'$set':{"name":name,"description":description,"date":date,"favorite":favorite,"updatedAt":updatedAt}})
+        if update_task:
+            return jsonify({'result':'success!'})
+    except Exception as e:
+        return e
+
+@app.route('/uploader', methods = ['GET', 'POST'])
+def upload_fille():
+   if request.method == 'POST':
+      f = request.files['file']
+      f.save(secure_filename(f.filename))
+      return 'file uploaded successfully'
+
+@app.route('/upload',methods = ['GET','POST'])
+def upload_file():
+    if request.method =='POST':
+        file = request.files['file']
+        if file:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
+            mongo.db.image.insert({'url':filename})
+            return "sucess"
+    return "Sucess!"
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+# ea1hE3wb6mkpsa2rRVRo
