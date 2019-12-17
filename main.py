@@ -1,5 +1,4 @@
 from app import *
-from flask_pymongo import pymongo
 
 @app.route('/register', methods=['POST'])
 def CreateUser():
