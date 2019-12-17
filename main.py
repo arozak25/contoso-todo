@@ -174,7 +174,7 @@ def newTask():
     if request.form:
         GenerateToDoId = uuid.uuid4()
         name = request.form['name']
-        description = request.form['description', None]
+        description = request.form['description'] or None
         date = request.form['date']
         favorite = False
         completed = False
@@ -185,7 +185,7 @@ def newTask():
     else:
         GenerateToDoId = uuid.uuid4()
         name = request.json['name']
-        description = request.json['description', None]
+        description = request.json['description'] or None
         date = request.json['date']
         favorite = False
         completed = False
