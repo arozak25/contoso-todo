@@ -84,11 +84,19 @@ def login():
 @app.route('/edit', methods=['PUT'])
 @jwt_required
 def editData():
-    fullName = request.form['fullName']
-    address = request.form['address']
-    phoneNumber = request.form['phoneNumber']
-    profilePictureUrl = request.form['profilePictureUrl']
-    email = request.form['email']
+    if request.form:
+        fullName = request.form['fullName']
+        address = request.form['address']
+        phoneNumber = request.form['phoneNumber']
+        profilePictureUrl = request.form['profilePictureUrl']
+        email = request.form['email']
+    else:
+        fullName = request.json['fullName']
+        address = request.json['address']
+        phoneNumber = request.json['phoneNumber']
+        profilePictureUrl = request.json['profilePictureUrl']
+        email = request.json['email']
+
     updatequery = {'email': email}
     newvalues = {'$set': {'fullName': fullName, 'address': address, 'phoneNumber': phoneNumber,
                                   'profilePictureUrl': profilePictureUrl}}
@@ -97,7 +105,11 @@ def editData():
 
 @app.route('/forgetpassword', methods=['POST'])
 def SendEmailForgetPassword():
-    email = request.form['email']
+    if request.form:
+        email = request.form['email']
+    else:
+        email = request.json['email']
+
     access_token = create_access_token(identity=email)
 
     msg = Message("EMAIL CONFIRMATION",
@@ -105,13 +117,17 @@ def SendEmailForgetPassword():
                   recipients=[email])
     msg.html = render_template('emails/email-verification.html')
     mail.send(msg)
-    return jsonify({'message':'Buka email anda','access_token':access_token})
+    return jsonify({'message': 'Buka email anda', 'access_token': access_token})
+
 
 @app.route('/forgetpassword/changepassword',methods=['PUT'])
 @jwt_required
 def updateForgetPassword():
     email = get_jwt_identity()
-    newpassword = request.form['newpassword']
+    if request.form:
+        newpassword = request.form['newpassword']
+    else:
+        newpassword = request.json['newpassword']
     pw_hash = bcrypt.generate_password_hash(newpassword)
     print(email)
     updatequery = {'email': email}
